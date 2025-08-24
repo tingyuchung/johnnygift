@@ -210,6 +210,9 @@ function handleTouchStart(e) {
   
   // 檢測觸控位置並設置控制
   updateTouchControls(touch.clientX, touch.clientY, true);
+  
+  // 處理觸控點擊 UI 元素
+  handleTouchUI(touch.clientX, touch.clientY);
 }
 
 // 處理觸控結束
@@ -258,6 +261,96 @@ function updateTouchControls(x, y, isActive) {
     touchControls.left = false;
     touchControls.right = false;
     touchControls.jump = false;
+  }
+}
+
+// 處理觸控點擊 UI 元素
+function handleTouchUI(x, y) {
+  console.log('📱 觸控點擊 UI:', x, y);
+  
+  // 檢查是否點擊了對話選項
+  if (state.inDialog) {
+    const dialogElement = document.getElementById('dialog');
+    if (dialogElement && !dialogElement.classList.contains('hidden')) {
+      const rect = dialogElement.getBoundingClientRect();
+      if (x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom) {
+        console.log('📱 觸控點擊對話框');
+        // 觸發對話確認
+        const dialogOk = document.getElementById('dialog-ok');
+        if (dialogOk) {
+          dialogOk.click();
+        }
+        return;
+      }
+    }
+  }
+  
+  // 檢查是否點擊了問題選項
+  if (state.inQuestion) {
+    const questionElement = document.getElementById('question-modal');
+    if (questionElement && !questionElement.classList.contains('hidden')) {
+      const rect = questionElement.getBoundingClientRect();
+      if (x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom) {
+        console.log('📱 觸控點擊問題選項');
+        // 觸控點擊問題選項時，選擇當前選中的選項
+        const selectedOption = questionElement.querySelector('.question-option.selected');
+        if (selectedOption) {
+          selectedOption.click();
+        }
+        return;
+      }
+    }
+  }
+  
+  // 檢查是否點擊了遊戲結束的"再挑戰一次"
+  if (state.mode === 'end' && ending.active) {
+    // 檢查"再挑戰一次"點擊區域
+    if (ending.restartClickArea) {
+      const rect = canvas.getBoundingClientRect();
+      const canvasX = x - rect.left;
+      const canvasY = y - rect.top;
+      
+      if (canvasX >= ending.restartClickArea.x && 
+          canvasX <= ending.restartClickArea.x + ending.restartClickArea.w &&
+          canvasY >= ending.restartClickArea.y && 
+          canvasY <= ending.restartClickArea.y + ending.restartClickArea.h) {
+        console.log('📱 觸控點擊再挑戰一次');
+        restartGame();
+        return;
+      }
+    }
+  }
+  
+  // 檢查是否點擊了重試模態框
+  const retryElement = document.getElementById('retry-modal');
+  if (retryElement && !retryElement.classList.contains('hidden')) {
+    const rect = retryElement.getBoundingClientRect();
+    if (x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom) {
+      console.log('📱 觸控點擊重試模態框');
+      // 觸控點擊重試模態框時，選擇"重玩"
+      const retryYesBtn = document.getElementById('retry-yes');
+      if (retryYesBtn) {
+        retryYesBtn.click();
+      }
+      return;
+    }
+  }
+  
+  // 檢查是否點擊了開始選單
+  if (state.mode === 'intro') {
+    const startMenu = document.getElementById('start-menu');
+    if (startMenu) {
+      const rect = startMenu.getBoundingClientRect();
+      if (x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom) {
+        console.log('📱 觸控點擊開始選單');
+        // 觸控點擊開始選單時，選擇"Start"
+        const startBtn = document.getElementById('start-btn');
+        if (startBtn) {
+          startBtn.click();
+        }
+        return;
+      }
+    }
   }
 }
 
@@ -448,6 +541,7 @@ const state = {
   cocoGreetedComplete: false,
   postGreetForwardMs: 0,
   inDialog: false,
+  inQuestion: false, // 新增：問題模式狀態
   // intro approach: both move toward each other until close then start dialog
   approachActive: true,
   isCocoDialog: false,
@@ -1830,6 +1924,7 @@ function openQuestion(qb){
   // Don't pause the game during questions - let time continue counting
   // state.paused = true; // 移除這行，讓時間繼續倒數
   state.inDialog = true;
+  state.inQuestion = true; // 新增：設置問題模式狀態
   const q = QUESTIONS[qb.qIndex];
   const modal = document.getElementById('question-modal');
   modal.classList.remove('hidden');
@@ -1885,6 +1980,7 @@ function openQuestion(qb){
       modal.classList.add('hidden');
       window.removeEventListener('keydown', onKey);
       state.inDialog = false;
+      state.inQuestion = false; // 新增：重置問題模式狀態
       state.paused = false;
       
       // 恢復背景音樂音量
@@ -1902,6 +1998,7 @@ function openQuestion(qb){
       window.removeEventListener('keydown', onKey);
       state.paused = false;
       state.inDialog = false;
+      state.inQuestion = false; // 新增：重置問題模式狀態
       
       // 恢復背景音樂音量
       restoreBackgroundMusicVolume();
