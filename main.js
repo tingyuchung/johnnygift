@@ -279,21 +279,55 @@ function handleTouchUI(x, y) {
         // 檢查是否是 Coco 對話選項階段
         if (dialogElement.classList.contains('coco-dialog')) {
           console.log('📱 觸控點擊 Coco 對話選項');
-          // 觸控點擊 Coco 對話選項時，選擇當前選中的選項
-          const selectedOption = dialogElement.querySelector('.option-selected');
-          if (selectedOption) {
-            console.log('📱 找到選中的選項，觸發選擇');
-            // 觸發對話確認
-            const dialogOk = document.getElementById('dialog-ok');
-            if (dialogOk) {
-              dialogOk.click();
-            }
-          } else {
-            console.log('📱 沒有找到選中的選項，觸發對話確認');
-            // 觸發對話確認
-            const dialogOk = document.getElementById('dialog-ok');
-            if (dialogOk) {
-              dialogOk.click();
+          
+          // 檢查觸控位置，判斷是否點擊了特定選項
+          const dialogRect = dialogElement.getBoundingClientRect();
+          const relativeY = y - dialogRect.top;
+          
+          // 計算每個選項的位置（假設三個選項平均分布）
+          const optionHeight = 40; // 每個選項的高度
+          const startY = 20; // 對話框頂部的偏移
+          
+          // 檢查觸控位置對應哪個選項
+          let selectedOptionIndex = 0;
+          if (relativeY >= startY && relativeY < startY + optionHeight) {
+            selectedOptionIndex = 0; // 第一個選項
+          } else if (relativeY >= startY + optionHeight && relativeY < startY + optionHeight * 2) {
+            selectedOptionIndex = 1; // 第二個選項
+          } else if (relativeY >= startY + optionHeight * 2 && relativeY < startY + optionHeight * 3) {
+            selectedOptionIndex = 2; // 第三個選項
+          }
+          
+          console.log('📱 觸控選項索引:', selectedOptionIndex);
+          
+          // 觸發選項選擇（直接調用全局選項選擇函數）
+          if (selectedOptionIndex >= 0 && selectedOptionIndex < 3) {
+            console.log('📱 選擇選項:', selectedOptionIndex);
+            
+            // 直接調用 Coco 對話的選項選擇邏輯
+            if (window.cocoDialogState && window.cocoDialogState.selectOption) {
+              // 調用全局的選項選擇函數
+              window.cocoDialogState.selectOption(selectedOptionIndex);
+            } else {
+              console.log('📱 全局選項選擇函數未找到，使用備用方案');
+              // 備用方案：模擬鍵盤導航
+              // 先導航到對應的選項
+              for (let i = 0; i < selectedOptionIndex; i++) {
+                const downEvent = new KeyboardEvent('keydown', {
+                  key: 'ArrowDown',
+                  bubbles: true
+                });
+                window.dispatchEvent(downEvent);
+              }
+              
+              // 延遲一下再按 Enter 確認選擇
+              setTimeout(() => {
+                const enterEvent = new KeyboardEvent('keydown', {
+                  key: 'Enter',
+                  bubbles: true
+                });
+                window.dispatchEvent(enterEvent);
+              }, 100);
             }
           }
         } else {
@@ -2326,6 +2360,21 @@ function startCocoDialogSequence(){
   
   // 開始對話時降低背景音樂音量
   lowerBackgroundMusicVolume();
+  
+  // 創建全局觸控選項選擇函數
+  window.cocoDialogState = {
+    selectOption: function(optionIndex) {
+      console.log('📱 觸控選擇選項:', optionIndex);
+      if (currentPhase === 'options' && optionIndex >= 0 && optionIndex < dialogData.options.length) {
+        selectedOption = optionIndex;
+        renderOptions();
+        // 延遲一下再確認選擇，讓用戶看到選項變化
+        setTimeout(() => {
+          selectOption();
+        }, 200);
+      }
+    }
+  };
   
   function showIntro(){
     // Add coco-intro class for consistent styling
