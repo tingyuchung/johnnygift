@@ -518,8 +518,17 @@ function getMobileTextScale() {
                    window.innerWidth <= 768;
   
   if (isMobile) {
-    console.log('📱 檢測到手機設備，文字縮放為70%');
-    return 0.7;
+    // 根據螢幕寬度動態調整縮放比例
+    let scale = 0.7; // 基礎縮放
+    
+    if (window.innerWidth <= 480) {
+      scale = 0.5; // 小螢幕手機：50%
+    } else if (window.innerWidth <= 768) {
+      scale = 0.6; // 中等螢幕手機：60%
+    }
+    
+    console.log(`📱 檢測到手機設備，螢幕寬度: ${window.innerWidth}px，文字縮放為: ${Math.round(scale * 100)}%`);
+    return scale;
   }
   
   return 1.0; // 桌面版保持100%
