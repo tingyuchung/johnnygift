@@ -304,23 +304,35 @@ function handleTouchUI(x, y) {
           // 觸控左半邊，選擇選項
           console.log('📱 觸控左半邊，嘗試選擇選項');
           
-          // 簡化觸控選項選擇邏輯
-          if (window.cocoDialogState && window.cocoDialogState.selectOption) {
-            // 直接觸發當前選中選項的選擇
-            const currentSelected = window.cocoDialogState.getCurrentSelectedOption ? 
-              window.cocoDialogState.getCurrentSelectedOption() : 0;
-            console.log('📱 觸控選擇當前選中選項:', currentSelected);
-            window.cocoDialogState.selectOption(currentSelected);
-          } else {
-            console.log('📱 全局選項選擇函數未找到，使用鍵盤模擬');
-            // 備用方案：模擬 Enter 鍵確認當前選項
+          // 檢測觸控位置對應哪個選項
+          const optionElements = dialogElement.querySelectorAll('[data-option]');
+          let clickedOptionIndex = -1;
+          
+          // 檢查觸控位置是否在任何選項上
+          for (let i = 0; i < optionElements.length; i++) {
+            const optionRect = optionElements[i].getBoundingClientRect();
+            if (x >= optionRect.left && x <= optionRect.right && 
+                y >= optionRect.top && y <= optionRect.bottom) {
+              clickedOptionIndex = parseInt(optionElements[i].getAttribute('data-option'));
+              break;
+            }
+          }
+          
+          if (clickedOptionIndex >= 0) {
+            console.log('📱 觸控點擊選項:', clickedOptionIndex);
+            // 觸控點擊了特定選項，直接選擇它
+            selectedOption = clickedOptionIndex;
+            renderOptions();
+            // 延遲一下再確認選擇，讓用戶看到選項變化
             setTimeout(() => {
-              const enterEvent = new KeyboardEvent('keydown', {
-                key: 'Enter',
-                bubbles: true
-              });
-              window.dispatchEvent(enterEvent);
-            }, 100);
+              showResponse();
+            }, 200);
+          } else {
+            console.log('📱 觸控位置不在選項上，選擇當前選中選項');
+            // 觸控位置不在選項上，選擇當前選中選項
+            setTimeout(() => {
+              showResponse();
+            }, 200);
           }
         } else {
           console.log('📱 觸控點擊普通對話框');
@@ -2406,15 +2418,30 @@ function startCocoDialogSequence(){
     const optionsHtml = dialogData.options.map((option, idx) => {
       const selected = idx === selectedOption;
       if (selected) {
-        return `<span class="option-selected" onclick="window.cocoDialogState.selectOption(${idx})"><span class="symbol-left">></span> ${option} <span class="symbol-right"><</span></span>`;
+        return `<span class="option-selected" data-option="${idx}"><span class="symbol-left">></span> ${option} <span class="symbol-right"><</span></span>`;
       } else {
-        return `<span onclick="window.cocoDialogState.selectOption(${idx})" style="cursor: pointer; text-decoration: underline;">  ${option}  </span>`;
+        return `<span data-option="${idx}" style="cursor: pointer; text-decoration: underline;">  ${option}  </span>`;
       }
     }).join('\n');
     
     dText.innerHTML = optionsHtml.replace(/\n/g, '<br>');
     ok.innerText = '▼';
     ok.onclick = selectOption;
+    
+    // 添加選項點擊事件監聽器
+    const optionElements = dText.querySelectorAll('[data-option]');
+    optionElements.forEach(element => {
+      element.addEventListener('click', function() {
+        const optionIndex = parseInt(this.getAttribute('data-option'));
+        console.log('🖱️ 點擊選項:', optionIndex);
+        selectedOption = optionIndex;
+        renderOptions();
+        // 延遲一下再確認選擇，讓用戶看到選項變化
+        setTimeout(() => {
+          showResponse();
+        }, 200);
+      });
+    });
     
     // Add keyboard navigation for options
     const onKeyOptions = (e) => {
@@ -2435,13 +2462,28 @@ function startCocoDialogSequence(){
       const optionsHtml = dialogData.options.map((option, idx) => {
         const selected = idx === selectedOption;
         if (selected) {
-          return `<span class="option-selected" onclick="window.cocoDialogState.selectOption(${idx})"><span class="symbol-left">></span> ${option} <span class="symbol-right"><</span></span>`;
+          return `<span class="option-selected" data-option="${idx}"><span class="symbol-left">></span> ${option} <span class="symbol-right"><</span></span>`;
         } else {
-          return `<span onclick="window.cocoDialogState.selectOption(${idx})" style="cursor: pointer; text-decoration: underline;">  ${option}  </span>`;
+          return `<span data-option="${idx}" style="cursor: pointer; text-decoration: underline;">  ${option}  </span>`;
         }
       }).join('\n');
       
       dText.innerHTML = optionsHtml.replace(/\n/g, '<br>');
+      
+      // 重新添加選項點擊事件監聽器
+      const optionElements = dText.querySelectorAll('[data-option]');
+      optionElements.forEach(element => {
+        element.addEventListener('click', function() {
+          const optionIndex = parseInt(this.getAttribute('data-option'));
+          console.log('🖱️ 點擊選項:', optionIndex);
+          selectedOption = optionIndex;
+          renderOptions();
+          // 延遲一下再確認選擇，讓用戶看到選項變化
+          setTimeout(() => {
+            showResponse();
+          }, 200);
+        });
+      });
     }
     
     function selectOption(){
