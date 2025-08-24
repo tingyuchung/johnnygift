@@ -302,59 +302,24 @@ function handleTouchUI(x, y) {
           }
           
           // 觸控左半邊，選擇選項
-          // 更準確的選項位置計算
-          // 對話框內容區域的實際位置
-          const contentStartY = 40; // 對話框內容開始位置
-          const optionHeight = 60; // 每個選項的高度（包含間距）
+          console.log('📱 觸控左半邊，嘗試選擇選項');
           
-          // 檢查觸控位置對應哪個選項
-          let selectedOptionIndex = -1;
-          
-          if (relativeY >= contentStartY && relativeY < contentStartY + optionHeight) {
-            selectedOptionIndex = 0; // 第一個選項
-          } else if (relativeY >= contentStartY + optionHeight && relativeY < contentStartY + optionHeight * 2) {
-            selectedOptionIndex = 1; // 第二個選項
-          } else if (relativeY >= contentStartY + optionHeight * 2 && relativeY < contentStartY + optionHeight * 3) {
-            selectedOptionIndex = 2; // 第三個選項
-          }
-          
-          console.log('📱 觸控位置分析:', {
-            relativeY,
-            relativeX,
-            isRightHalf,
-            contentStartY,
-            optionHeight,
-            selectedOptionIndex,
-            optionRanges: [
-              `${contentStartY} - ${contentStartY + optionHeight}`,
-              `${contentStartY + optionHeight} - ${contentStartY + optionHeight * 2}`,
-              `${contentStartY + optionHeight * 2} - ${contentStartY + optionHeight * 3}`
-            ]
-          });
-          
-          console.log('📱 觸控選項索引:', selectedOptionIndex);
-          
-          // 觸發選項選擇（直接調用全局選項選擇函數）
-          if (selectedOptionIndex >= 0 && selectedOptionIndex < 3) {
-            console.log('📱 選擇選項:', selectedOptionIndex);
-            
-            // 直接調用 Coco 對話的選項選擇邏輯
+          // 使用與問題選項相同的邏輯：直接點擊選中的選項
+          const selectedOptionElement = dialogElement.querySelector('.option-selected');
+          if (selectedOptionElement) {
+            console.log('📱 找到選中的選項元素，直接點擊');
+            selectedOptionElement.click();
+          } else {
+            console.log('📱 未找到選中的選項元素，嘗試觸發選項選擇');
+            // 備用方案：觸發選項選擇
             if (window.cocoDialogState && window.cocoDialogState.selectOption) {
-              // 調用全局的選項選擇函數
-              window.cocoDialogState.selectOption(selectedOptionIndex);
+              // 如果當前沒有選中的選項，選擇第一個
+              const currentSelected = window.cocoDialogState.getCurrentSelectedOption ? 
+                window.cocoDialogState.getCurrentSelectedOption() : 0;
+              window.cocoDialogState.selectOption(currentSelected);
             } else {
-              console.log('📱 全局選項選擇函數未找到，使用備用方案');
-              // 備用方案：模擬鍵盤導航
-              // 先導航到對應的選項
-              for (let i = 0; i < selectedOptionIndex; i++) {
-                const downEvent = new KeyboardEvent('keydown', {
-                  key: 'ArrowDown',
-                  bubbles: true
-                });
-                window.dispatchEvent(downEvent);
-              }
-              
-              // 延遲一下再按 Enter 確認選擇
+              console.log('📱 全局選項選擇函數未找到，使用鍵盤模擬');
+              // 備用方案：模擬 Enter 鍵確認當前選項
               setTimeout(() => {
                 const enterEvent = new KeyboardEvent('keydown', {
                   key: 'Enter',
@@ -363,8 +328,6 @@ function handleTouchUI(x, y) {
                 window.dispatchEvent(enterEvent);
               }, 100);
             }
-          } else {
-            console.log('📱 觸控位置無效，無法選擇選項');
           }
         } else {
           console.log('📱 觸控點擊普通對話框');
@@ -2409,6 +2372,9 @@ function startCocoDialogSequence(){
           selectOption();
         }, 200);
       }
+    },
+    getCurrentSelectedOption: function() {
+      return selectedOption;
     }
   };
   
