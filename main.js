@@ -436,13 +436,26 @@ function handleTouchUI(x, y) {
     
     // 額外檢查：如果觸控在畫布上，嘗試觸發滑鼠點擊事件
     console.log('📱 嘗試觸發滑鼠點擊事件來處理觸控');
+    
+    // 計算畫布座標
+    const rect = canvas.getBoundingClientRect();
+    const canvasX = x - rect.left;
+    const canvasY = y - rect.top;
+    
+    console.log(`📱 觸控座標轉換: 觸控(${x}, ${y}) -> 畫布(${canvasX}, ${canvasY})`);
+    console.log(`📱 畫布邊界: left=${rect.left}, top=${rect.top}, width=${rect.width}, height=${rect.height}`);
+    
+    // 創建滑鼠點擊事件，使用觸控座標
     const clickEvent = new MouseEvent('click', {
       clientX: x,
       clientY: y,
       bubbles: true,
       cancelable: true
     });
+    
+    // 觸發滑鼠點擊事件到畫布
     canvas.dispatchEvent(clickEvent);
+    console.log('📱 滑鼠點擊事件已觸發到畫布，等待處理結果');
   }
   
   // 檢查是否點擊了重試模態框
