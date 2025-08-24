@@ -445,6 +445,26 @@ function handleTouchUI(x, y) {
     console.log(`📱 觸控座標轉換: 觸控(${x}, ${y}) -> 畫布(${canvasX}, ${canvasY})`);
     console.log(`📱 畫布邊界: left=${rect.left}, top=${rect.top}, width=${rect.width}, height=${rect.height}`);
     
+    // 檢查"再挑戰一次"點擊區域（使用畫布座標）
+    if (ending.restartClickArea) {
+      console.log(`📱 檢查重啟點擊區域: restartClickArea=${JSON.stringify(ending.restartClickArea)}`);
+      
+      if (canvasX >= ending.restartClickArea.x && 
+          canvasX <= ending.restartClickArea.x + ending.restartClickArea.w &&
+          canvasY >= ending.restartClickArea.y && 
+          canvasY <= ending.restartClickArea.y + ending.restartClickArea.h) {
+        console.log('📱 觸控點擊"再挑戰一次"區域 - 成功！');
+        restartGame();
+        return;
+      } else {
+        console.log('📱 觸控位置不在"再挑戰一次"區域內');
+        console.log(`📱 畫布座標: (${canvasX}, ${canvasY})`);
+        console.log(`📱 重啟區域範圍: x=${ending.restartClickArea.x}, y=${ending.restartClickArea.y}, right=${ending.restartClickArea.x + ending.restartClickArea.w}, bottom=${ending.restartClickArea.y + ending.restartClickArea.h}`);
+      }
+    } else {
+      console.log('⚠️ 重啟點擊區域未設置');
+    }
+    
     // 創建滑鼠點擊事件，使用觸控座標
     const clickEvent = new MouseEvent('click', {
       clientX: x,
