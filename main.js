@@ -511,6 +511,20 @@ function handleTouchUI(x, y) {
   }
 }
 
+// 手機版文字縮放函數
+function getMobileTextScale() {
+  // 檢測是否為手機設備
+  const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || 
+                   window.innerWidth <= 768;
+  
+  if (isMobile) {
+    console.log('📱 檢測到手機設備，文字縮放為70%');
+    return 0.7;
+  }
+  
+  return 1.0; // 桌面版保持100%
+}
+
 // 播放背景音樂
 function playBackgroundMusic() {
   console.log('🎵 嘗試播放背景音樂...');
@@ -1713,17 +1727,23 @@ function render(){
     
     // Draw timer at top-right
     const timerText = `TIME ${Math.ceil(state.timeLeftMs/1000)}s`;
-    ctx.font = '16px "Zpix","UnifontLocal","Unifont","Press Start 2P",monospace';
+    
+    // 手機版文字縮放
+    const mobileScale = getMobileTextScale();
+    const timerFontSize = Math.round(16 * mobileScale);
+    ctx.font = `${timerFontSize}px "Zpix","UnifontLocal","Unifont","Press Start 2P",monospace`;
     ctx.textAlign = 'right';
     ctx.textBaseline = 'top';
     
     // Timer background for better visibility
     const timerWidth = ctx.measureText(timerText).width;
-    const timerX = canvas.width - 20;
-    const timerY = 20;
+    const timerX = canvas.width - Math.round(20 * mobileScale);
+    const timerY = Math.round(20 * mobileScale);
     
     ctx.fillStyle = 'rgba(0,0,0,0.6)';
-    ctx.fillRect(timerX - timerWidth - 10, timerY - 5, timerWidth + 20, 26);
+    const timerPadding = Math.round(10 * mobileScale);
+    const timerHeight = Math.round(26 * mobileScale);
+    ctx.fillRect(timerX - timerWidth - timerPadding, timerY - Math.round(5 * mobileScale), timerWidth + (timerPadding * 2), timerHeight);
     
     ctx.fillStyle = '#fff';
     ctx.fillText(timerText, timerX, timerY);
@@ -1748,7 +1768,11 @@ function render(){
       // GAME OVER or TIME UP text with breathing effect
       const breathingAlpha = 0.7 + 0.3 * Math.sin(ending.gameOverTimer / 1000 * Math.PI);
       ctx.globalAlpha = breathingAlpha;
-      ctx.font = '72px "Unifont","UnifontLocal","Zpix","Press Start 2P",monospace';
+      
+      // 手機版文字縮放
+      const mobileScale = getMobileTextScale();
+      const fontSize = Math.round(72 * mobileScale);
+      ctx.font = `${fontSize}px "Unifont","UnifontLocal","Zpix","Press Start 2P",monospace`;
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
       
@@ -1765,7 +1789,7 @@ function render(){
       const y = canvas.height / 2;
       
       // White text with black outline
-      ctx.lineWidth = 8;
+      ctx.lineWidth = Math.round(8 * mobileScale);
       ctx.strokeStyle = '#000';
       ctx.strokeText(gameOverText, x, y);
       ctx.fillStyle = '#fff';
@@ -1774,7 +1798,11 @@ function render(){
       // Menu options (appear after 2 seconds)
       if(ending.menuAlpha > 0){
         ctx.globalAlpha = ending.menuAlpha;
-        ctx.font = '32px "Unifont","UnifontLocal","Zpix","Press Start 2P",monospace';
+        
+        // 手機版文字縮放
+        const mobileScale = getMobileTextScale();
+        const menuFontSize = Math.round(32 * mobileScale);
+        ctx.font = `${menuFontSize}px "Unifont","UnifontLocal","Zpix","Press Start 2P",monospace`;
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
         
@@ -1802,7 +1830,7 @@ function render(){
         const blinkAlpha = 0.4 + 0.6 * Math.sin(ending.gameOverTimer / 1500 * Math.PI * 2);
         
         // Draw the text with blinking effect
-        ctx.lineWidth = 4;
+        ctx.lineWidth = Math.round(4 * mobileScale);
         ctx.strokeStyle = '#000';
         ctx.strokeText(typewriterText, x, optionY);
         
@@ -1816,11 +1844,13 @@ function render(){
         
         // Store click area for "再挑戰一次" option
         const textWidth = ctx.measureText(displayText).width;
+        const clickAreaPadding = Math.round(20 * mobileScale);
+        const clickAreaHeight = Math.round(60 * mobileScale);
         ending.restartClickArea = {
-          x: x - 20, // add some padding
-          y: optionY - 30,
-          w: textWidth + 40,
-          h: 60
+          x: x - clickAreaPadding, // add some padding
+          y: optionY - Math.round(30 * mobileScale),
+          w: textWidth + (clickAreaPadding * 2),
+          h: clickAreaHeight
         };
       }
       
@@ -1872,11 +1902,13 @@ function render(){
       ctx.globalAlpha = alpha;
       const title = ending.finalTitle || '';
       // big readable font with outline to avoid blending into dark background
-      ctx.font = '40px "Unifont","UnifontLocal","Zpix","Press Start 2P",monospace';
+      const mobileScale = getMobileTextScale();
+      const titleFontSize = Math.round(40 * mobileScale);
+      ctx.font = `${titleFontSize}px "Unifont","UnifontLocal","Zpix","Press Start 2P",monospace`;
       const tw = Math.max(1, ctx.measureText(title).width);
       const tx = Math.round(canvas.width/2 - tw/2);
       const ty = Math.round(canvas.height/2 + 120);
-      ctx.lineWidth = 6;
+      ctx.lineWidth = Math.round(6 * mobileScale);
       ctx.strokeStyle = 'rgba(0,0,0,0.9)';
       ctx.strokeText(title, tx, ty);
       ctx.fillStyle = '#fff';
@@ -1884,11 +1916,13 @@ function render(){
       
       // Store click area for TRY AGAIN interaction
       if(ending.finalTitle === 'TRY AGAIN'){
+        const clickAreaPadding = Math.round(20 * mobileScale);
+        const clickAreaHeight = Math.round(80 * mobileScale);
         ending.titleClickArea = {
-          x: tx - 20, // add some padding
-          y: ty - 40,
-          w: tw + 40,
-          h: 80
+          x: tx - clickAreaPadding, // add some padding
+          y: ty - Math.round(40 * mobileScale),
+          w: tw + (clickAreaPadding * 2),
+          h: clickAreaHeight
         };
       }
       
@@ -1953,17 +1987,20 @@ function render(){
         
         // Only render if visible on screen
         if(y > -50 && y < canvas.height + 50){
-          ctx.font = `${credit.size}px "Unifont","UnifontLocal","Zpix","Press Start 2P",monospace`;
+          // 手機版文字縮放
+          const mobileScale = getMobileTextScale();
+          const creditFontSize = Math.round(credit.size * mobileScale);
+          ctx.font = `${creditFontSize}px "Unifont","UnifontLocal","Zpix","Press Start 2P",monospace`;
           ctx.textAlign = 'center';
           ctx.textBaseline = 'middle';
           
           // Enhanced text shadow for better readability on animation background
-          ctx.lineWidth = 4;
+          ctx.lineWidth = Math.round(4 * mobileScale);
           ctx.strokeStyle = 'rgba(0,0,0,0.8)';
           ctx.strokeText(credit.text, canvas.width / 2, y);
           
           // Add glow effect for better visibility
-          ctx.lineWidth = 2;
+          ctx.lineWidth = Math.round(2 * mobileScale);
           ctx.strokeStyle = 'rgba(255,255,255,0.3)';
           ctx.strokeText(credit.text, canvas.width / 2, y);
           
@@ -1999,7 +2036,9 @@ function render(){
       ctx.fillRect(0, 0, canvas.width, canvas.height);
       
       // TRY AGAIN text
-      ctx.font = '72px "Unifont","UnifontLocal","Zpix","Press Start 2P",monospace';
+      const mobileScale = getMobileTextScale();
+      const tryAgainFontSize = Math.round(72 * mobileScale);
+      ctx.font = `${tryAgainFontSize}px "Unifont","UnifontLocal","Zpix","Press Start 2P",monospace`;
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
       
@@ -2007,14 +2046,15 @@ function render(){
       const y = canvas.height / 2 - 50;
       
       // White text with black outline
-      ctx.lineWidth = 8;
+      ctx.lineWidth = Math.round(8 * mobileScale);
       ctx.strokeStyle = '#000';
       ctx.strokeText('TRY AGAIN', x, y);
       ctx.fillStyle = '#fff';
       ctx.fillText('TRY AGAIN', x, y);
       
       // Menu options
-      ctx.font = '32px "Unifont","UnifontLocal","Zpix","Press Start 2P",monospace';
+      const menuFontSize = Math.round(32 * mobileScale);
+      ctx.font = `${menuFontSize}px "Unifont","UnifontLocal","Zpix","Press Start 2P",monospace`;
       const menuY = y + 120;
       
       // Only one option - no need for selection logic
@@ -2037,7 +2077,7 @@ function render(){
       const blinkAlpha = 0.4 + 0.6 * Math.sin(ending.angryAnimationTimer / 1500 * Math.PI * 2);
       
       // Draw the text with blinking effect
-      ctx.lineWidth = 4;
+      ctx.lineWidth = Math.round(4 * mobileScale);
       ctx.strokeStyle = '#000';
       ctx.strokeText(typewriterText, x, optionY);
       
@@ -2051,11 +2091,13 @@ function render(){
       
       // Store click area for "再挑戰一次" option in angry ending
       const textWidth = ctx.measureText(typewriterText).width;
+      const clickAreaPadding = Math.round(20 * mobileScale);
+      const clickAreaHeight = Math.round(60 * mobileScale);
       ending.restartClickArea = {
-        x: x - textWidth/2 - 20, // center the click area
-        y: optionY - 30,
-        w: textWidth + 40,
-        h: 60
+        x: x - textWidth/2 - clickAreaPadding, // center the click area
+        y: optionY - Math.round(30 * mobileScale),
+        w: textWidth + (clickAreaPadding * 2),
+        h: clickAreaHeight
       };
       
       ctx.textAlign = 'left';
