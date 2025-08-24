@@ -283,9 +283,25 @@ function handleTouchUI(x, y) {
           // 檢查觸控位置，判斷是否點擊了特定選項
           const dialogRect = dialogElement.getBoundingClientRect();
           const relativeY = y - dialogRect.top;
+          const relativeX = x - dialogRect.left;
+          const dialogWidth = dialogRect.width;
           
-          console.log('📱 觸控座標:', { x, y, relativeY, dialogTop: dialogRect.top });
+          console.log('📱 觸控座標:', { x, y, relativeY, relativeX, dialogTop: dialogRect.top, dialogWidth });
           
+          // 檢查是否觸控螢幕右半邊（繼續對話）
+          const isRightHalf = relativeX > dialogWidth / 2;
+          
+          if (isRightHalf) {
+            console.log('📱 觸控螢幕右半邊，繼續對話');
+            // 觸控右半邊，繼續對話
+            const dialogOk = document.getElementById('dialog-ok');
+            if (dialogOk) {
+              dialogOk.click();
+            }
+            return;
+          }
+          
+          // 觸控左半邊，選擇選項
           // 更準確的選項位置計算
           // 對話框內容區域的實際位置
           const contentStartY = 40; // 對話框內容開始位置
@@ -304,6 +320,8 @@ function handleTouchUI(x, y) {
           
           console.log('📱 觸控位置分析:', {
             relativeY,
+            relativeX,
+            isRightHalf,
             contentStartY,
             optionHeight,
             selectedOptionIndex,
