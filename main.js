@@ -304,16 +304,30 @@ function handleTouchUI(x, y) {
           // 觸控左半邊，選擇選項
           console.log('📱 觸控左半邊，嘗試選擇選項');
           
-          // 使用與問題選項相同的邏輯：直接點擊選中的選項
-          const selectedOptionElement = dialogElement.querySelector('.option-selected');
-          if (selectedOptionElement) {
-            console.log('📱 找到選中的選項元素，直接點擊');
-            selectedOptionElement.click();
-          } else {
-            console.log('📱 未找到選中的選項元素，嘗試觸發選項選擇');
-            // 備用方案：觸發選項選擇
+          // 檢測觸控位置對應哪個選項
+          const optionElements = dialogElement.querySelectorAll('[onclick*="selectOption"]');
+          let clickedOptionIndex = -1;
+          
+          // 檢查觸控位置是否在任何選項上
+          for (let i = 0; i < optionElements.length; i++) {
+            const optionRect = optionElements[i].getBoundingClientRect();
+            if (x >= optionRect.left && x <= optionRect.right && 
+                y >= optionRect.top && y <= optionRect.bottom) {
+              clickedOptionIndex = i;
+              break;
+            }
+          }
+          
+          if (clickedOptionIndex >= 0) {
+            console.log('📱 觸控點擊選項:', clickedOptionIndex);
+            // 觸控點擊了特定選項，直接選擇它
             if (window.cocoDialogState && window.cocoDialogState.selectOption) {
-              // 如果當前沒有選中的選項，選擇第一個
+              window.cocoDialogState.selectOption(clickedOptionIndex);
+            }
+          } else {
+            console.log('📱 觸控位置不在選項上，嘗試觸發選項選擇');
+            // 觸控位置不在選項上，觸發當前選中選項的選擇
+            if (window.cocoDialogState && window.cocoDialogState.selectOption) {
               const currentSelected = window.cocoDialogState.getCurrentSelectedOption ? 
                 window.cocoDialogState.getCurrentSelectedOption() : 0;
               window.cocoDialogState.selectOption(currentSelected);
@@ -2414,7 +2428,7 @@ function startCocoDialogSequence(){
       if (selected) {
         return `<span class="option-selected" onclick="window.cocoDialogState.selectOption(${idx})"><span class="symbol-left">></span> ${option} <span class="symbol-right"><</span></span>`;
       } else {
-        return `<span onclick="window.cocoDialogState.selectOption(${idx})" style="cursor: pointer;">  ${option}  `;
+        return `<span onclick="window.cocoDialogState.selectOption(${idx})" style="cursor: pointer; text-decoration: underline;">  ${option}  </span>`;
       }
     }).join('\n');
     
@@ -2443,7 +2457,7 @@ function startCocoDialogSequence(){
         if (selected) {
           return `<span class="option-selected" onclick="window.cocoDialogState.selectOption(${idx})"><span class="symbol-left">></span> ${option} <span class="symbol-right"><</span></span>`;
         } else {
-          return `<span onclick="window.cocoDialogState.selectOption(${idx})" style="cursor: pointer;">  ${option}  </span>`;
+          return `<span onclick="window.cocoDialogState.selectOption(${idx})" style="cursor: pointer; text-decoration: underline;">  ${option}  </span>`;
         }
       }).join('\n');
       
