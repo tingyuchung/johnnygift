@@ -284,19 +284,35 @@ function handleTouchUI(x, y) {
           const dialogRect = dialogElement.getBoundingClientRect();
           const relativeY = y - dialogRect.top;
           
-          // 計算每個選項的位置（假設三個選項平均分布）
-          const optionHeight = 40; // 每個選項的高度
-          const startY = 20; // 對話框頂部的偏移
+          console.log('📱 觸控座標:', { x, y, relativeY, dialogTop: dialogRect.top });
+          
+          // 更準確的選項位置計算
+          // 對話框內容區域的實際位置
+          const contentStartY = 40; // 對話框內容開始位置
+          const optionHeight = 60; // 每個選項的高度（包含間距）
           
           // 檢查觸控位置對應哪個選項
-          let selectedOptionIndex = 0;
-          if (relativeY >= startY && relativeY < startY + optionHeight) {
+          let selectedOptionIndex = -1;
+          
+          if (relativeY >= contentStartY && relativeY < contentStartY + optionHeight) {
             selectedOptionIndex = 0; // 第一個選項
-          } else if (relativeY >= startY + optionHeight && relativeY < startY + optionHeight * 2) {
+          } else if (relativeY >= contentStartY + optionHeight && relativeY < contentStartY + optionHeight * 2) {
             selectedOptionIndex = 1; // 第二個選項
-          } else if (relativeY >= startY + optionHeight * 2 && relativeY < startY + optionHeight * 3) {
+          } else if (relativeY >= contentStartY + optionHeight * 2 && relativeY < contentStartY + optionHeight * 3) {
             selectedOptionIndex = 2; // 第三個選項
           }
+          
+          console.log('📱 觸控位置分析:', {
+            relativeY,
+            contentStartY,
+            optionHeight,
+            selectedOptionIndex,
+            optionRanges: [
+              `${contentStartY} - ${contentStartY + optionHeight}`,
+              `${contentStartY + optionHeight} - ${contentStartY + optionHeight * 2}`,
+              `${contentStartY + optionHeight * 2} - ${contentStartY + optionHeight * 3}`
+            ]
+          });
           
           console.log('📱 觸控選項索引:', selectedOptionIndex);
           
@@ -329,6 +345,8 @@ function handleTouchUI(x, y) {
                 window.dispatchEvent(enterEvent);
               }, 100);
             }
+          } else {
+            console.log('📱 觸控位置無效，無法選擇選項');
           }
         } else {
           console.log('📱 觸控點擊普通對話框');
