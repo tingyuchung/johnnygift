@@ -2412,9 +2412,9 @@ function startCocoDialogSequence(){
     const optionsHtml = dialogData.options.map((option, idx) => {
       const selected = idx === selectedOption;
       if (selected) {
-        return `<span class="option-selected"><span class="symbol-left">></span> ${option} <span class="symbol-right"><</span></span>`;
+        return `<span class="option-selected" onclick="window.cocoDialogState.selectOption(${idx})"><span class="symbol-left">></span> ${option} <span class="symbol-right"><</span></span>`;
       } else {
-        return `  ${option}  `;
+        return `<span onclick="window.cocoDialogState.selectOption(${idx})" style="cursor: pointer;">  ${option}  `;
       }
     }).join('\n');
     
@@ -2441,9 +2441,9 @@ function startCocoDialogSequence(){
       const optionsHtml = dialogData.options.map((option, idx) => {
         const selected = idx === selectedOption;
         if (selected) {
-          return `<span class="option-selected"><span class="symbol-left">></span> ${option} <span class="symbol-right"><</span></span>`;
+          return `<span class="option-selected" onclick="window.cocoDialogState.selectOption(${idx})"><span class="symbol-left">></span> ${option} <span class="symbol-right"><</span></span>`;
         } else {
-          return `  ${option}  `;
+          return `<span onclick="window.cocoDialogState.selectOption(${idx})" style="cursor: pointer;">  ${option}  </span>`;
         }
       }).join('\n');
       
