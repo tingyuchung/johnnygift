@@ -433,6 +433,16 @@ function handleTouchUI(x, y) {
         });
       }
     }
+    
+    // 額外檢查：如果觸控在畫布上，嘗試觸發滑鼠點擊事件
+    console.log('📱 嘗試觸發滑鼠點擊事件來處理觸控');
+    const clickEvent = new MouseEvent('click', {
+      clientX: x,
+      clientY: y,
+      bubbles: true,
+      cancelable: true
+    });
+    canvas.dispatchEvent(clickEvent);
   }
   
   // 檢查是否點擊了重試模態框
