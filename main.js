@@ -304,44 +304,23 @@ function handleTouchUI(x, y) {
           // 觸控左半邊，選擇選項
           console.log('📱 觸控左半邊，嘗試選擇選項');
           
-          // 檢測觸控位置對應哪個選項
-          const optionElements = dialogElement.querySelectorAll('[onclick*="selectOption"]');
-          let clickedOptionIndex = -1;
-          
-          // 檢查觸控位置是否在任何選項上
-          for (let i = 0; i < optionElements.length; i++) {
-            const optionRect = optionElements[i].getBoundingClientRect();
-            if (x >= optionRect.left && x <= optionRect.right && 
-                y >= optionRect.top && y <= optionRect.bottom) {
-              clickedOptionIndex = i;
-              break;
-            }
-          }
-          
-          if (clickedOptionIndex >= 0) {
-            console.log('📱 觸控點擊選項:', clickedOptionIndex);
-            // 觸控點擊了特定選項，直接選擇它
-            if (window.cocoDialogState && window.cocoDialogState.selectOption) {
-              window.cocoDialogState.selectOption(clickedOptionIndex);
-            }
+          // 簡化觸控選項選擇邏輯
+          if (window.cocoDialogState && window.cocoDialogState.selectOption) {
+            // 直接觸發當前選中選項的選擇
+            const currentSelected = window.cocoDialogState.getCurrentSelectedOption ? 
+              window.cocoDialogState.getCurrentSelectedOption() : 0;
+            console.log('📱 觸控選擇當前選中選項:', currentSelected);
+            window.cocoDialogState.selectOption(currentSelected);
           } else {
-            console.log('📱 觸控位置不在選項上，嘗試觸發選項選擇');
-            // 觸控位置不在選項上，觸發當前選中選項的選擇
-            if (window.cocoDialogState && window.cocoDialogState.selectOption) {
-              const currentSelected = window.cocoDialogState.getCurrentSelectedOption ? 
-                window.cocoDialogState.getCurrentSelectedOption() : 0;
-              window.cocoDialogState.selectOption(currentSelected);
-            } else {
-              console.log('📱 全局選項選擇函數未找到，使用鍵盤模擬');
-              // 備用方案：模擬 Enter 鍵確認當前選項
-              setTimeout(() => {
-                const enterEvent = new KeyboardEvent('keydown', {
-                  key: 'Enter',
-                  bubbles: true
-                });
-                window.dispatchEvent(enterEvent);
-              }, 100);
-            }
+            console.log('📱 全局選項選擇函數未找到，使用鍵盤模擬');
+            // 備用方案：模擬 Enter 鍵確認當前選項
+            setTimeout(() => {
+              const enterEvent = new KeyboardEvent('keydown', {
+                key: 'Enter',
+                bubbles: true
+              });
+              window.dispatchEvent(enterEvent);
+            }, 100);
           }
         } else {
           console.log('📱 觸控點擊普通對話框');
@@ -2383,7 +2362,8 @@ function startCocoDialogSequence(){
         renderOptions();
         // 延遲一下再確認選擇，讓用戶看到選項變化
         setTimeout(() => {
-          selectOption();
+          // 直接調用 showResponse 而不是 selectOption
+          showResponse();
         }, 200);
       }
     },
