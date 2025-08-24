@@ -268,17 +268,41 @@ function updateTouchControls(x, y, isActive) {
 function handleTouchUI(x, y) {
   console.log('📱 觸控點擊 UI:', x, y);
   
-  // 檢查是否點擊了對話選項
+  // 檢查是否點擊了對話選項（包括 Coco 對話和普通對話）
   if (state.inDialog) {
     const dialogElement = document.getElementById('dialog');
     if (dialogElement && !dialogElement.classList.contains('hidden')) {
       const rect = dialogElement.getBoundingClientRect();
       if (x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom) {
         console.log('📱 觸控點擊對話框');
-        // 觸發對話確認
-        const dialogOk = document.getElementById('dialog-ok');
-        if (dialogOk) {
-          dialogOk.click();
+        
+        // 檢查是否是 Coco 對話選項階段
+        if (dialogElement.classList.contains('coco-dialog')) {
+          console.log('📱 觸控點擊 Coco 對話選項');
+          // 觸控點擊 Coco 對話選項時，選擇當前選中的選項
+          const selectedOption = dialogElement.querySelector('.option-selected');
+          if (selectedOption) {
+            console.log('📱 找到選中的選項，觸發選擇');
+            // 觸發對話確認
+            const dialogOk = document.getElementById('dialog-ok');
+            if (dialogOk) {
+              dialogOk.click();
+            }
+          } else {
+            console.log('📱 沒有找到選中的選項，觸發對話確認');
+            // 觸發對話確認
+            const dialogOk = document.getElementById('dialog-ok');
+            if (dialogOk) {
+              dialogOk.click();
+            }
+          }
+        } else {
+          console.log('📱 觸控點擊普通對話框');
+          // 觸發對話確認
+          const dialogOk = document.getElementById('dialog-ok');
+          if (dialogOk) {
+            dialogOk.click();
+          }
         }
         return;
       }
@@ -304,17 +328,41 @@ function handleTouchUI(x, y) {
   
   // 檢查是否點擊了遊戲結束的"再挑戰一次"
   if (state.mode === 'end' && ending.active) {
+    console.log('📱 檢查遊戲結束觸控:', ending.restartClickArea);
+    
     // 檢查"再挑戰一次"點擊區域
     if (ending.restartClickArea) {
       const rect = canvas.getBoundingClientRect();
       const canvasX = x - rect.left;
       const canvasY = y - rect.top;
       
+      console.log('📱 畫布觸控座標:', canvasX, canvasY);
+      console.log('📱 重啟點擊區域:', ending.restartClickArea);
+      
       if (canvasX >= ending.restartClickArea.x && 
           canvasX <= ending.restartClickArea.x + ending.restartClickArea.w &&
           canvasY >= ending.restartClickArea.y && 
           canvasY <= ending.restartClickArea.y + ending.restartClickArea.h) {
         console.log('📱 觸控點擊再挑戰一次');
+        restartGame();
+        return;
+      }
+    } else {
+      console.log('📱 重啟點擊區域未設置，嘗試智能檢測');
+      
+      // 智能檢測：如果沒有設置點擊區域，檢查是否點擊了畫布中央區域
+      const rect = canvas.getBoundingClientRect();
+      const canvasX = x - rect.left;
+      const canvasY = y - rect.top;
+      
+      // 檢查是否點擊了畫布中央區域（通常是"再挑戰一次"的位置）
+      const centerX = canvas.width / 2;
+      const centerY = canvas.height / 2;
+      const clickRadius = 100; // 點擊半徑
+      
+      if (Math.abs(canvasX - centerX) < clickRadius && 
+          Math.abs(canvasY - centerY) < clickRadius) {
+        console.log('📱 智能檢測到中央區域觸控，觸發重啟');
         restartGame();
         return;
       }
