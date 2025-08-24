@@ -208,6 +208,14 @@ function handleTouchStart(e) {
   touchStartX = touch.clientX;
   touchStartY = touch.clientY;
   
+  console.log('📱 觸控開始:', { x: touch.clientX, y: touch.clientY, mode: state.mode, endingActive: ending.active });
+  console.log('📱 觸控事件詳情:', {
+    touches: e.touches.length,
+    target: e.target,
+    currentTarget: e.currentTarget,
+    type: e.type
+  });
+  
   // 檢測觸控位置並設置控制
   updateTouchControls(touch.clientX, touch.clientY, true);
   
@@ -367,6 +375,7 @@ function handleTouchUI(x, y) {
   // 檢查是否點擊了遊戲結束的"再挑戰一次"
   if (state.mode === 'end' && ending.active) {
     console.log('📱 檢查遊戲結束觸控:', ending.restartClickArea);
+    console.log('📱 遊戲結束狀態:', { mode: state.mode, endingActive: ending.active, restartClickArea: ending.restartClickArea });
     
     // 檢查"再挑戰一次"點擊區域
     if (ending.restartClickArea) {
@@ -376,14 +385,24 @@ function handleTouchUI(x, y) {
       
       console.log('📱 畫布觸控座標:', canvasX, canvasY);
       console.log('📱 重啟點擊區域:', ending.restartClickArea);
+      console.log('📱 畫布邊界:', rect);
       
       if (canvasX >= ending.restartClickArea.x && 
           canvasX <= ending.restartClickArea.x + ending.restartClickArea.w &&
           canvasY >= ending.restartClickArea.y && 
           canvasY <= ending.restartClickArea.y + ending.restartClickArea.h) {
-        console.log('📱 觸控點擊再挑戰一次');
+        console.log('📱 觸控點擊再挑戰一次 - 成功！');
         restartGame();
         return;
+      } else {
+        console.log('📱 觸控位置不在重啟點擊區域內');
+        console.log('📱 觸控座標:', canvasX, canvasY);
+        console.log('📱 點擊區域範圍:', {
+          x: ending.restartClickArea.x,
+          y: ending.restartClickArea.y,
+          right: ending.restartClickArea.x + ending.restartClickArea.w,
+          bottom: ending.restartClickArea.y + ending.restartClickArea.h
+        });
       }
     } else {
       console.log('📱 重啟點擊區域未設置，嘗試智能檢測');
@@ -396,13 +415,22 @@ function handleTouchUI(x, y) {
       // 檢查是否點擊了畫布中央區域（通常是"再挑戰一次"的位置）
       const centerX = canvas.width / 2;
       const centerY = canvas.height / 2;
-      const clickRadius = 100; // 點擊半徑
+      const clickRadius = 150; // 增加點擊半徑，提高觸控成功率
+      
+      console.log('📱 智能檢測參數:', { centerX, centerY, clickRadius, canvasX, canvasY });
       
       if (Math.abs(canvasX - centerX) < clickRadius && 
           Math.abs(canvasY - centerY) < clickRadius) {
         console.log('📱 智能檢測到中央區域觸控，觸發重啟');
         restartGame();
         return;
+      } else {
+        console.log('📱 智能檢測失敗，觸控位置不在中央區域');
+        console.log('📱 距離計算:', {
+          xDistance: Math.abs(canvasX - centerX),
+          yDistance: Math.abs(canvasY - centerY),
+          clickRadius: clickRadius
+        });
       }
     }
   }
