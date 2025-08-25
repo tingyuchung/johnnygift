@@ -385,6 +385,19 @@ body{margin:0;font-family:'ZpixLocal','Zpix','UnifontLocal','Unifont','Press Sta
     font-family: 'ZpixLocal','Zpix','UnifontLocal','Unifont','Press Start 2P', monospace !important; /* 確保字體 */
   }
   
+  /* 手機版選單樣式優化 - 確保選單正確顯示 */
+  #start-overlay #start-menu.start-menu:empty::before {
+    content: "Start";
+    display: block;
+    text-align: center;
+    color: #fff;
+    text-shadow: 2px 2px 0 #000;
+    font-family: 'ZpixLocal','Zpix','UnifontLocal','Unifont','Press Start 2P', monospace;
+    font-size: 18px;
+    line-height: 24px;
+    margin-top: 30px;
+  }
+  
   /* 手機版選單選項樣式優化 - 只顯示Start選項 */
   #start-overlay #start-menu.start-menu .option-selected {
     color: #ffff00 !important; /* 選中狀態的顏色 */
