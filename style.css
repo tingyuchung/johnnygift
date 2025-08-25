@@ -404,6 +404,25 @@ body{margin:0;font-family:'ZpixLocal','Zpix','UnifontLocal','Unifont','Press Sta
     text-shadow: 2px 2px 0 #000 !important; /* 文字陰影 */
   }
   
+  /* 手機版控制說明字體縮小 - 與封面字體大小一致 */
+  #dialog.controls-dialog #dialog-text {
+    font-size: 12px !important; /* 從32px改為12px，與封面標題一致 */
+    line-height: 16px !important; /* 調整行高 */
+    min-height: 200px !important; /* 減少最小高度 */
+  }
+  
+  #dialog.controls-dialog #dialog-text .controls-title {
+    font-size: 14px !important; /* 從36px改為14px，與封面標題一致 */
+    line-height: 18px !important; /* 調整行高 */
+    margin-bottom: 10px !important; /* 調整間距 */
+  }
+  
+  #dialog.controls-dialog #dialog-ok {
+    font-size: 12px !important; /* 從32px改為12px，與封面標題一致 */
+    padding: 8px 16px !important; /* 調整按鈕大小 */
+    margin-left: 20px !important; /* 調整左邊距 */
+  }
+  
   /* 手機版隱藏結局選單，但不隱藏主選單 */
   .ending-menu {
     display: none;
@@ -618,18 +637,37 @@ body{margin:0;font-family:'ZpixLocal','Zpix','UnifontLocal','Unifont','Press Sta
       line-height: 1.2 !important;
     }
     
-    /* 極小螢幕橫屏主選單選項顯示和樣式 */
-    #start-overlay #start-menu.start-menu {
-      font-size: 10px !important; /* 從12px改為10px */
-      line-height: 14px !important; /* 調整行高 */
-      margin-top: 15px !important; /* 調整間距 */
-      display: block !important; /* 確保選單顯示 */
-      color: #fff !important; /* 確保文字顏色 */
-      text-shadow: 2px 2px 0 #000 !important; /* 確保文字陰影 */
-      text-align: center !important; /* 確保文字居中 */
-      font-family: 'ZpixLocal','Zpix','UnifontLocal','Unifont','Press Start 2P', monospace !important; /* 確保字體 */
-    }
+      /* 極小螢幕橫屏主選單選項顯示和樣式 */
+  #start-overlay #start-menu.start-menu {
+    font-size: 10px !important; /* 從12px改為10px */
+    line-height: 14px !important; /* 調整行高 */
+    margin-top: 15px !important; /* 調整間距 */
+    display: block !important; /* 確保選單顯示 */
+    color: #fff !important; /* 確保文字顏色 */
+    text-shadow: 2px 2px 0 #000 !important; /* 確保文字陰影 */
+    text-align: center !important; /* 確保文字居中 */
+    font-family: 'ZpixLocal','Zpix','UnifontLocal','Unifont','Press Start 2P', monospace !important; /* 確保字體 */
   }
+  
+  /* 橫屏模式控制說明字體縮小 */
+  #dialog.controls-dialog #dialog-text {
+    font-size: 10px !important; /* 從32px改為10px，與橫屏封面標題一致 */
+    line-height: 14px !important; /* 調整行高 */
+    min-height: 150px !important; /* 減少最小高度 */
+  }
+  
+  #dialog.controls-dialog #dialog-text .controls-title {
+    font-size: 12px !important; /* 從36px改為12px，與橫屏封面標題一致 */
+    line-height: 16px !important; /* 調整行高 */
+    margin-bottom: 8px !important; /* 調整間距 */
+  }
+  
+  #dialog.controls-dialog #dialog-ok {
+    font-size: 10px !important; /* 從32px改為10px，與橫屏封面標題一致 */
+    padding: 6px 12px !important; /* 調整按鈕大小 */
+    margin-left: 15px !important; /* 調整左邊距 */
+  }
+}
 }
 
 /* 高解析度螢幕優化 */
