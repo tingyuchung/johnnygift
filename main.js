@@ -1801,6 +1801,9 @@ function render(){
         const baseText = option; // Just the text without > <
         const typewriterText = `> ${baseText.substring(0, ending.typewriterIndex)} <`;
         
+        // Calculate text width for underline positioning
+        const textWidth = ctx.measureText(displayText).width;
+        
         // Add symbolBlink effect for > < symbols (100% to 40% transparency)
         const blinkAlpha = 0.4 + 0.6 * Math.sin(ending.gameOverTimer / 1500 * Math.PI * 2);
         
@@ -1815,10 +1818,20 @@ function render(){
         ctx.fillText(typewriterText, x, optionY);
         ctx.globalAlpha = 1.0; // Reset alpha
         
+        // Add underline for "再挑戰一次" option to confirm selection
+        const underlineY = optionY + Math.round(8 * mobileScale);
+        ctx.lineWidth = Math.round(3 * mobileScale);
+        ctx.strokeStyle = '#fff';
+        ctx.globalAlpha = blinkAlpha; // Use same blinking effect as text
+        ctx.beginPath();
+        ctx.moveTo(x - Math.round(textWidth / 2), underlineY);
+        ctx.lineTo(x + Math.round(textWidth / 2), underlineY);
+        ctx.stroke();
+        ctx.globalAlpha = 1.0; // Reset alpha
+        
         ctx.restore();
         
         // Store click area for "再挑戰一次" option
-        const textWidth = ctx.measureText(displayText).width;
         const clickAreaPadding = Math.round(20 * mobileScale);
         const clickAreaHeight = Math.round(60 * mobileScale);
         ending.restartClickArea = {
@@ -2040,6 +2053,9 @@ function render(){
       const baseText = option;
       const typewriterText = `> ${baseText.substring(0, ending.typewriterIndex)} <`;
       
+      // Calculate text width for underline positioning
+      const textWidth = ctx.measureText(typewriterText).width;
+      
       // Add cursor effect (simple scale like dialog options)
       const scale = 1.1; // Same scale as .question-option.selected
       
@@ -2062,10 +2078,20 @@ function render(){
       ctx.fillText(typewriterText, x, optionY);
       ctx.globalAlpha = 1.0; // Reset alpha
       
+      // Add underline for "再挑戰一次" option to confirm selection
+      const underlineY = optionY + Math.round(8 * mobileScale);
+      ctx.lineWidth = Math.round(3 * mobileScale);
+      ctx.strokeStyle = '#fff';
+      ctx.globalAlpha = blinkAlpha; // Use same blinking effect as text
+      ctx.beginPath();
+      ctx.moveTo(x - Math.round(textWidth / 2), underlineY);
+      ctx.lineTo(x + Math.round(textWidth / 2), underlineY);
+      ctx.stroke();
+      ctx.globalAlpha = 1.0; // Reset alpha
+      
       ctx.restore();
       
       // Store click area for "再挑戰一次" option in angry ending
-      const textWidth = ctx.measureText(typewriterText).width;
       const clickAreaPadding = Math.round(20 * mobileScale);
       const clickAreaHeight = Math.round(60 * mobileScale);
       ending.restartClickArea = {
