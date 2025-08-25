@@ -377,42 +377,34 @@ function handleTouchUI(x, y) {
     console.log('📱 檢查遊戲結束觸控:', ending.restartClickArea);
     console.log('📱 遊戲結束狀態:', { mode: state.mode, endingActive: ending.active, restartClickArea: ending.restartClickArea });
     
-    // 檢查"再挑戰一次"點擊區域
+    // 計算畫布座標（只計算一次）
+    const rect = canvas.getBoundingClientRect();
+    const canvasX = x - rect.left;
+    const canvasY = y - rect.top;
+    
+    console.log(`📱 觸控座標轉換: 觸控(${x}, ${y}) -> 畫布(${canvasX}, ${canvasY})`);
+    console.log(`📱 畫布邊界: left=${rect.left}, top=${rect.top}, width=${rect.width}, height=${rect.height}`);
+    
+    // 優先檢查"再挑戰一次"點擊區域
     if (ending.restartClickArea) {
-      const rect = canvas.getBoundingClientRect();
-      const canvasX = x - rect.left;
-      const canvasY = y - rect.top;
-      
-      console.log('📱 畫布觸控座標:', canvasX, canvasY);
-      console.log('📱 重啟點擊區域:', ending.restartClickArea);
-      console.log('📱 畫布邊界:', rect);
+      console.log(`📱 檢查重啟點擊區域: restartClickArea=${JSON.stringify(ending.restartClickArea)}`);
       
       if (canvasX >= ending.restartClickArea.x && 
           canvasX <= ending.restartClickArea.x + ending.restartClickArea.w &&
           canvasY >= ending.restartClickArea.y && 
           canvasY <= ending.restartClickArea.y + ending.restartClickArea.h) {
-        console.log('📱 觸控點擊再挑戰一次 - 成功！');
+        console.log('📱 觸控點擊"再挑戰一次"區域 - 成功！');
         restartGame();
         return;
       } else {
-        console.log('📱 觸控位置不在重啟點擊區域內');
-        console.log('📱 觸控座標:', canvasX, canvasY);
-        console.log('📱 點擊區域範圍:', {
-          x: ending.restartClickArea.x,
-          y: ending.restartClickArea.y,
-          right: ending.restartClickArea.x + ending.restartClickArea.w,
-          bottom: ending.restartClickArea.y + ending.restartClickArea.h
-        });
+        console.log('📱 觸控位置不在"再挑戰一次"區域內');
+        console.log(`📱 畫布座標: (${canvasX}, ${canvasY})`);
+        console.log(`📱 重啟區域範圍: x=${ending.restartClickArea.x}, y=${ending.restartClickArea.y}, right=${ending.restartClickArea.x + ending.restartClickArea.w}, bottom=${ending.restartClickArea.y + ending.restartClickArea.h}`);
       }
     } else {
       console.log('📱 重啟點擊區域未設置，嘗試智能檢測');
       
-      // 智能檢測：如果沒有設置點擊區域，檢查是否點擊了畫布中央區域
-      const rect = canvas.getBoundingClientRect();
-      const canvasX = x - rect.left;
-      const canvasY = y - rect.top;
-      
-      // 檢查是否點擊了畫布中央區域（通常是"再挑戰一次"的位置）
+      // 智能檢測：檢查是否點擊了畫布中央區域（通常是"再挑戰一次"的位置）
       const centerX = canvas.width / 2;
       const centerY = canvas.height / 2;
       const clickRadius = 150; // 增加點擊半徑，提高觸控成功率
@@ -434,36 +426,8 @@ function handleTouchUI(x, y) {
       }
     }
     
-    // 額外檢查：如果觸控在畫布上，嘗試觸發滑鼠點擊事件
-    console.log('📱 嘗試觸發滑鼠點擊事件來處理觸控');
-    
-    // 計算畫布座標
-    const rect = canvas.getBoundingClientRect();
-    const canvasX = x - rect.left;
-    const canvasY = y - rect.top;
-    
-    console.log(`📱 觸控座標轉換: 觸控(${x}, ${y}) -> 畫布(${canvasX}, ${canvasY})`);
-    console.log(`📱 畫布邊界: left=${rect.left}, top=${rect.top}, width=${rect.width}, height=${rect.height}`);
-    
-    // 檢查"再挑戰一次"點擊區域（使用畫布座標）
-    if (ending.restartClickArea) {
-      console.log(`📱 檢查重啟點擊區域: restartClickArea=${JSON.stringify(ending.restartClickArea)}`);
-      
-      if (canvasX >= ending.restartClickArea.x && 
-          canvasX <= ending.restartClickArea.x + ending.restartClickArea.w &&
-          canvasY >= ending.restartClickArea.y && 
-          canvasY <= ending.restartClickArea.y + ending.restartClickArea.h) {
-        console.log('📱 觸控點擊"再挑戰一次"區域 - 成功！');
-        restartGame();
-        return;
-      } else {
-        console.log('📱 觸控位置不在"再挑戰一次"區域內');
-        console.log(`📱 畫布座標: (${canvasX}, ${canvasY})`);
-        console.log(`📱 重啟區域範圍: x=${ending.restartClickArea.x}, y=${ending.restartClickArea.y}, right=${ending.restartClickArea.x + ending.restartClickArea.w}, bottom=${ending.restartClickArea.y + ending.restartClickArea.h}`);
-      }
-    } else {
-      console.log('⚠️ 重啟點擊區域未設置');
-    }
+    // 如果直接觸控檢測失敗，嘗試觸發滑鼠點擊事件作為備用方案
+    console.log('📱 直接觸控檢測失敗，嘗試觸發滑鼠點擊事件');
     
     // 創建滑鼠點擊事件，使用觸控座標
     const clickEvent = new MouseEvent('click', {
@@ -521,11 +485,13 @@ function getMobileTextScale() {
     // 根據螢幕寬度動態調整縮放比例
     let scale = 0.7; // 基礎縮放
     
-    if (window.innerWidth <= 480) {
-      scale = 0.5; // 小螢幕手機：50%
-    } else if (window.innerWidth <= 768) {
-      scale = 0.6; // 中等螢幕手機：60%
-    }
+            if (window.innerWidth <= 360) {
+          scale = 0.4; // 超小螢幕手機：40%
+        } else if (window.innerWidth <= 480) {
+          scale = 0.5; // 小螢幕手機：50%
+        } else if (window.innerWidth <= 768) {
+          scale = 0.6; // 中等螢幕手機：60%
+        }
     
     console.log(`📱 檢測到手機設備，螢幕寬度: ${window.innerWidth}px，文字縮放為: ${Math.round(scale * 100)}%`);
     return scale;
