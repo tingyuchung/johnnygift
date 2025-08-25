@@ -2867,8 +2867,9 @@ function enableStartScreenEvents(){
   const menuPre = document.getElementById('start-menu');
   
   if(menuPre){
-    const items = ['How to Play','Start'];
-    let idx = 1; // default focus on Start
+    // 手機版只顯示Start選項，桌面版顯示完整選單
+    const items = isTouchDevice ? ['Start'] : ['How to Play','Start'];
+    let idx = isTouchDevice ? 0 : 1; // 手機版預設選中Start，桌面版預設選中Start
     const renderMenu = ()=>{
       const lines = items.map((t, i)=>{
         const selected = (i===idx);
@@ -3076,8 +3077,9 @@ window.addEventListener('load',()=>{
   window.addEventListener('keydown', onStartKey);
   // Build retro RPG menu with cursor and keyboard control
   if(menuPre){
-    const items = ['How to Play','Start'];
-    let idx = 1; // default focus on Start
+    // 手機版只顯示Start選項，桌面版顯示完整選單
+    const items = isTouchDevice ? ['Start'] : ['How to Play','Start'];
+    let idx = isTouchDevice ? 0 : 1; // 手機版預設選中Start，桌面版預設選中Start
     const renderMenu = ()=>{
       const lines = items.map((t, i)=>{
         const selected = (i===idx);
