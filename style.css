@@ -373,6 +373,21 @@ body{margin:0;font-family:'ZpixLocal','Zpix','UnifontLocal','Unifont','Press Sta
     padding: 0 10px; /* 添加左右內邊距 */
   }
   
+  /* 手機版隱藏"再挑戰一次"選項 */
+  .start-menu {
+    display: none;
+  }
+  
+  /* 手機版隱藏Game Over和TIME UP的"再挑戰一次"選項 */
+  #start-overlay .start-menu {
+    display: none;
+  }
+  
+  /* 手機版隱藏所有結局選單 */
+  .ending-menu {
+    display: none;
+  }
+  
   #start-menu {
     font-size: 12px; /* 從14px改為12px */
     line-height: 1.8;
