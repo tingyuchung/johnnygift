@@ -861,6 +861,16 @@ function updateEnding(dt){
     return; // Skip normal ending logic for Game Over
   }
   
+  // Handle Game Over mode (score 0 or time up) - auto-restart for mobile
+  if(ending.gameOverMode && ending.phase === 'gameOver'){
+    // For mobile devices, auto-restart after 3 seconds in menu mode
+    if(isTouchDevice && ending.gameOverTimer >= 5000){ // 2s delay + 3s menu = 5s total
+      console.log('📱 手機版Game Over自動重新開始遊戲');
+      restartGame();
+      return;
+    }
+  }
+  
   // Handle Angry Ending mode (play animation first, then show menu)
   if(ending.angryEndingMode){
     ending.angryAnimationTimer += dt;
@@ -879,19 +889,26 @@ function updateEnding(dt){
       // Start showing menu immediately
       ending.menuAlpha = Math.min(1, ending.menuAlpha + dt/500);
       
-      // Typewriter effect for menu options
-      if(ending.typewriterTimer <= 0){
+      // For mobile devices, auto-restart after 3 seconds in menu mode
+      if(isTouchDevice && ending.angryAnimationTimer >= 8000){ // 5s animation + 3s menu = 8s total
+        console.log('📱 手機版生氣結局自動重新開始遊戲');
+        restartGame();
+        return;
+      }
+      
+      // Typewriter effect for menu options (only for non-mobile)
+      if(!isTouchDevice && ending.typewriterTimer <= 0){
         ending.typewriterTimer = 50; // 50ms per character
         if(ending.typewriterIndex < ending.menuOptions[0].length){
           ending.typewriterText += ending.menuOptions[0][ending.typewriterIndex];
           ending.typewriterIndex++;
         }
-      } else {
+      } else if(!isTouchDevice) {
         ending.typewriterTimer -= dt;
       }
       
-      // Handle keyboard input for Angry Ending menu
-      if(ending.menuAlpha > 0.5){
+      // Handle keyboard input for Angry Ending menu (only for non-mobile)
+      if(!isTouchDevice && ending.menuAlpha > 0.5){
         if(keys['Enter'] && !ending.keyPressed){
           ending.keyPressed = true;
           // Handle menu selection - only restart option
@@ -1774,73 +1791,95 @@ function render(){
       if(ending.menuAlpha > 0){
         ctx.globalAlpha = ending.menuAlpha;
         
-        // 手機版文字縮放
-        const mobileScale = getMobileTextScale();
-        const menuFontSize = Math.round(32 * mobileScale);
-        ctx.font = `${menuFontSize}px "Unifont","UnifontLocal","Zpix","Press Start 2P",monospace`;
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        
-        const menuY = y + 120;
-        const optionSpacing = 50;
-        
-        // Only one option - no need for selection logic
-        const option = ending.menuOptions[0];
-        const optionY = menuY;
-        const displayText = `> ${option} <`;
-        
-        // Add cursor effect (simple scale like dialog options)
-        const scale = 1.1; // Same scale as .question-option.selected
-        
-        ctx.save();
-        ctx.translate(x, optionY);
-        ctx.scale(scale, scale);
-        ctx.translate(-x, -optionY);
-        
-        // Typewriter effect - need to account for the added > < symbols
-        const baseText = option; // Just the text without > <
-        const typewriterText = `> ${baseText.substring(0, ending.typewriterIndex)} <`;
-        
-        // Calculate text width for underline positioning
-        const textWidth = ctx.measureText(displayText).width;
-        
-        // Add symbolBlink effect for > < symbols (100% to 40% transparency)
-        const blinkAlpha = 0.4 + 0.6 * Math.sin(ending.gameOverTimer / 1500 * Math.PI * 2);
-        
-        // Draw the text with blinking effect
-        ctx.lineWidth = Math.round(4 * mobileScale);
-        ctx.strokeStyle = '#000';
-        ctx.strokeText(typewriterText, x, optionY);
-        
-        // Apply blinking effect to the text (white with varying transparency)
-        ctx.globalAlpha = blinkAlpha;
-        ctx.fillStyle = '#fff';
-        ctx.fillText(typewriterText, x, optionY);
-        ctx.globalAlpha = 1.0; // Reset alpha
-        
-        // Add underline for "再挑戰一次" option to confirm selection
-        // Note: We're still inside the ctx.save() context, so transformations apply
-        const underlineY = optionY + Math.round(8 * mobileScale);
-        ctx.lineWidth = Math.round(3 * mobileScale);
-        ctx.strokeStyle = '#fff';
-        ctx.globalAlpha = blinkAlpha; // Use same blinking effect as text
-        ctx.beginPath();
-        ctx.moveTo(x - Math.round(textWidth / 2), underlineY);
-        ctx.lineTo(x + Math.round(textWidth / 2), underlineY);
-        ctx.stroke();
-        ctx.globalAlpha = 1.0; // Reset alpha
-        
-        ctx.restore();
-        
-        // Store click area for "再挑戰一次" option
-        const clickAreaPadding = Math.round(20 * mobileScale);
-        const clickAreaHeight = Math.round(60 * mobileScale);
-        ending.restartClickArea = {
-          x: x - clickAreaPadding, // add some padding
-          y: optionY - Math.round(30 * mobileScale),
-          w: textWidth + (clickAreaPadding * 2),
-          h: clickAreaHeight
-        };
+        // Check if it's mobile device - if so, don't show "再挑戰一次" text
+        if (!isTouchDevice) {
+          // Only show menu options on non-mobile devices
+          const menuFontSize = Math.round(32 * mobileScale);
+          ctx.font = `${menuFontSize}px "Unifont","UnifontLocal","Zpix","Press Start 2P",monospace`;
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          
+          const menuY = y + 120;
+          const optionSpacing = 50;
+          
+          // Only one option - no need for selection logic
+          const option = ending.menuOptions[0];
+          const optionY = menuY;
+          const displayText = `> ${option} <`;
+          
+          // Add cursor effect (simple scale like dialog options)
+          const scale = 1.1; // Same scale as .question-option.selected
+          
+          ctx.save();
+          ctx.translate(x, optionY);
+          ctx.scale(scale, scale);
+          ctx.translate(-x, -optionY);
+          
+          // Typewriter effect - need to account for the added > < symbols
+          const baseText = option; // Just the text without > <
+          const typewriterText = `> ${baseText.substring(0, ending.typewriterIndex)} <`;
+          
+          // Calculate text width for underline positioning
+          const textWidth = ctx.measureText(displayText).width;
+          
+          // Add symbolBlink effect for > < symbols (100% to 40% transparency)
+          const blinkAlpha = 0.4 + 0.6 * Math.sin(ending.gameOverTimer / 1500 * Math.PI * 2);
+          
+          // Draw the text with blinking effect
+          ctx.lineWidth = Math.round(4 * mobileScale);
+          ctx.strokeStyle = '#000';
+          ctx.strokeText(typewriterText, x, optionY);
+          
+          // Apply blinking effect to the text (white with varying transparency)
+          ctx.globalAlpha = blinkAlpha;
+          ctx.fillStyle = '#fff';
+          ctx.fillText(typewriterText, x, optionY);
+          ctx.globalAlpha = 1.0; // Reset alpha
+          
+          // Add underline for "再挑戰一次" option to confirm selection
+          // Note: We're still inside the ctx.save() context, so transformations apply
+          const underlineY = optionY + Math.round(8 * mobileScale);
+          ctx.lineWidth = Math.round(3 * mobileScale);
+          ctx.strokeStyle = '#fff';
+          ctx.globalAlpha = blinkAlpha; // Use same blinking effect as text
+          ctx.beginPath();
+          ctx.moveTo(x - Math.round(textWidth / 2), underlineY);
+          ctx.lineTo(x + Math.round(textWidth / 2), underlineY);
+          ctx.stroke();
+          ctx.globalAlpha = 1.0; // Reset alpha
+          
+          ctx.restore();
+          
+          // Store click area for "再挑戰一次" option (only for non-mobile)
+          const clickAreaPadding = Math.round(20 * mobileScale);
+          const clickAreaHeight = Math.round(60 * mobileScale);
+          ending.restartClickArea = {
+            x: x - clickAreaPadding, // add some padding
+            y: optionY - Math.round(30 * mobileScale),
+            w: textWidth + (clickAreaPadding * 2),
+            h: clickAreaHeight
+          };
+        } else {
+          // For mobile devices, clear the restart click area and add countdown text
+          ending.restartClickArea = null;
+          
+          // Show countdown text for mobile
+          const countdownFontSize = Math.round(24 * mobileScale);
+          ctx.font = `${countdownFontSize}px "Unifont","UnifontLocal","Zpix","Press Start 2P",monospace`;
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          
+          const countdownY = y + 120;
+          const remainingTime = Math.max(0, 3 - Math.floor(ending.gameOverTimer / 1000));
+          const countdownText = `遊戲將在 ${remainingTime} 秒後自動重新開始`;
+          
+          // Draw countdown text
+          ctx.lineWidth = Math.round(2 * mobileScale);
+          ctx.strokeStyle = '#000';
+          ctx.strokeText(countdownText, x, countdownY);
+          ctx.fillStyle = '#fff';
+          ctx.fillText(countdownText, x, countdownY);
+        }
       }
       
       ctx.globalAlpha = 1.0;
@@ -2041,67 +2080,90 @@ function render(){
       ctx.fillStyle = '#fff';
       ctx.fillText('TRY AGAIN', x, y);
       
-      // Menu options
-      const menuFontSize = Math.round(32 * mobileScale);
-      ctx.font = `${menuFontSize}px "Unifont","UnifontLocal","Zpix","Press Start 2P",monospace`;
-      const menuY = y + 120;
-      
-      // Only one option - no need for selection logic
-      const option = ending.menuOptions[0];
-      const optionY = menuY;
-      
-      // Typewriter effect with cursor effects
-      const baseText = option;
-      const typewriterText = `> ${baseText.substring(0, ending.typewriterIndex)} <`;
-      
-      // Calculate text width for underline positioning
-      const textWidth = ctx.measureText(typewriterText).width;
-      
-      // Add cursor effect (simple scale like dialog options)
-      const scale = 1.1; // Same scale as .question-option.selected
-      
-      ctx.save();
-      ctx.translate(x, optionY);
-      ctx.scale(scale, scale);
-      ctx.translate(-x, -optionY);
-      
-      // Add symbolBlink effect for > < symbols (100% to 40% transparency)
-      const blinkAlpha = 0.4 + 0.6 * Math.sin(ending.angryAnimationTimer / 1500 * Math.PI * 2);
-      
-      // Draw the text with blinking effect
-      ctx.lineWidth = Math.round(4 * mobileScale);
-      ctx.strokeStyle = '#000';
-      ctx.strokeText(typewriterText, x, optionY);
-      
-      // Apply blinking effect to the text (white with varying transparency)
-      ctx.globalAlpha = blinkAlpha;
-      ctx.fillStyle = '#fff';
-      ctx.fillText(typewriterText, x, optionY);
-      ctx.globalAlpha = 1.0; // Reset alpha
-      
-      // Add underline for "再挑戰一次" option to confirm selection
-      // Note: We're still inside the ctx.save() context, so transformations apply
-      const underlineY = optionY + Math.round(8 * mobileScale);
-      ctx.lineWidth = Math.round(3 * mobileScale);
-      ctx.strokeStyle = '#fff';
-      ctx.globalAlpha = blinkAlpha; // Use same blinking effect as text
-      ctx.beginPath();
-      ctx.moveTo(x - Math.round(textWidth / 2), underlineY);
-      ctx.lineTo(x + Math.round(textWidth / 2), underlineY);
-      ctx.stroke();
-      ctx.globalAlpha = 1.0; // Reset alpha
-      
-      ctx.restore();
-      
-      // Store click area for "再挑戰一次" option in angry ending
-      const clickAreaPadding = Math.round(20 * mobileScale);
-      const clickAreaHeight = Math.round(60 * mobileScale);
-      ending.restartClickArea = {
-        x: x - textWidth/2 - clickAreaPadding, // center the click area
-        y: optionY - Math.round(30 * mobileScale),
-        w: textWidth + (clickAreaPadding * 2),
-        h: clickAreaHeight
-      };
+      // Check if it's mobile device - if so, don't show "再挑戰一次" text
+      if (!isTouchDevice) {
+        // Only show menu options on non-mobile devices
+        const menuFontSize = Math.round(32 * mobileScale);
+        ctx.font = `${menuFontSize}px "Unifont","UnifontLocal","Zpix","Press Start 2P",monospace`;
+        const menuY = y + 120;
+        
+        // Only one option - no need for selection logic
+        const option = ending.menuOptions[0];
+        const optionY = menuY;
+        
+        // Typewriter effect with cursor effects
+        const baseText = option;
+        const typewriterText = `> ${baseText.substring(0, ending.typewriterIndex)} <`;
+        
+        // Calculate text width for underline positioning
+        const textWidth = ctx.measureText(typewriterText).width;
+        
+        // Add cursor effect (simple scale like dialog options)
+        const scale = 1.1; // Same scale as .question-option.selected
+        
+        ctx.save();
+        ctx.translate(x, optionY);
+        ctx.scale(scale, scale);
+        ctx.translate(-x, -optionY);
+        
+        // Add symbolBlink effect for > < symbols (100% to 40% transparency)
+        const blinkAlpha = 0.4 + 0.6 * Math.sin(ending.angryAnimationTimer / 1500 * Math.PI * 2);
+        
+        // Draw the text with blinking effect
+        ctx.lineWidth = Math.round(4 * mobileScale);
+        ctx.strokeStyle = '#000';
+        ctx.strokeText(typewriterText, x, optionY);
+        
+        // Apply blinking effect to the text (white with varying transparency)
+        ctx.globalAlpha = blinkAlpha;
+        ctx.fillStyle = '#fff';
+        ctx.fillText(typewriterText, x, optionY);
+        ctx.globalAlpha = 1.0; // Reset alpha
+        
+        // Add underline for "再挑戰一次" option to confirm selection
+        // Note: We're still inside the ctx.save() context, so transformations apply
+        const underlineY = optionY + Math.round(8 * mobileScale);
+        ctx.lineWidth = Math.round(3 * mobileScale);
+        ctx.strokeStyle = '#fff';
+        ctx.globalAlpha = blinkAlpha; // Use same blinking effect as text
+        ctx.beginPath();
+        ctx.moveTo(x - Math.round(textWidth / 2), underlineY);
+        ctx.lineTo(x + Math.round(textWidth / 2), underlineY);
+        ctx.stroke();
+        ctx.globalAlpha = 1.0; // Reset alpha
+        
+        ctx.restore();
+        
+        // Store click area for "再挑戰一次" option in angry ending (only for non-mobile)
+        const clickAreaPadding = Math.round(20 * mobileScale);
+        const clickAreaHeight = Math.round(60 * mobileScale);
+        ending.restartClickArea = {
+          x: x - textWidth/2 - clickAreaPadding, // center the click area
+          y: optionY - Math.round(30 * mobileScale),
+          w: textWidth + (clickAreaPadding * 2),
+          h: clickAreaHeight
+        };
+      } else {
+        // For mobile devices, clear the restart click area and add countdown text
+        ending.restartClickArea = null;
+        
+        // Show countdown text for mobile
+        const countdownFontSize = Math.round(24 * mobileScale);
+        ctx.font = `${countdownFontSize}px "Unifont","UnifontLocal","Zpix","Press Start 2P",monospace`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        
+        const countdownY = y + 120;
+        const remainingTime = Math.max(0, 3 - Math.floor(ending.angryAnimationTimer / 1000));
+        const countdownText = `遊戲將在 ${remainingTime} 秒後自動重新開始`;
+        
+        // Draw countdown text
+        ctx.lineWidth = Math.round(2 * mobileScale);
+        ctx.strokeStyle = '#000';
+        ctx.strokeText(countdownText, x, countdownY);
+        ctx.fillStyle = '#fff';
+        ctx.fillText(countdownText, x, countdownY);
+      }
       
       ctx.textAlign = 'left';
       ctx.textBaseline = 'top';
