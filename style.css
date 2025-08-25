@@ -378,6 +378,7 @@ body{margin:0;font-family:'ZpixLocal','Zpix','UnifontLocal','Unifont','Press Sta
     font-size: 18px !important; /* 從32px改為18px，更適合手機 */
     line-height: 24px !important; /* 調整行高 */
     margin-top: 30px !important; /* 調整間距 */
+    display: block !important; /* 確保選單顯示 */
   }
   
   /* 手機版隱藏"再挑戰一次"選項 */
@@ -387,7 +388,7 @@ body{margin:0;font-family:'ZpixLocal','Zpix','UnifontLocal','Unifont','Press Sta
   
   /* 手機版隱藏Game Over和TIME UP的"再挑戰一次"選項 */
   #start-overlay .start-menu {
-    display: none;
+    display: block !important; /* 主選單要顯示，不是隱藏 */
   }
   
   /* 手機版隱藏所有結局選單 */
