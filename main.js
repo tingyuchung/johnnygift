@@ -1819,6 +1819,7 @@ function render(){
         ctx.globalAlpha = 1.0; // Reset alpha
         
         // Add underline for "再挑戰一次" option to confirm selection
+        // Note: We're still inside the ctx.save() context, so transformations apply
         const underlineY = optionY + Math.round(8 * mobileScale);
         ctx.lineWidth = Math.round(3 * mobileScale);
         ctx.strokeStyle = '#fff';
@@ -2079,6 +2080,7 @@ function render(){
       ctx.globalAlpha = 1.0; // Reset alpha
       
       // Add underline for "再挑戰一次" option to confirm selection
+      // Note: We're still inside the ctx.save() context, so transformations apply
       const underlineY = optionY + Math.round(8 * mobileScale);
       ctx.lineWidth = Math.round(3 * mobileScale);
       ctx.strokeStyle = '#fff';
