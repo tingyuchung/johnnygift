@@ -276,6 +276,13 @@ function updateTouchControls(x, y, isActive) {
 function handleTouchUI(x, y) {
   console.log('📱 觸控點擊 UI:', x, y);
   
+  // 手機版：在Game Over、TIME UP或分數太低時，點擊任意位置重新開始遊戲
+  if (isTouchDevice && ending.active && (ending.gameOverMode || ending.angryEndingMode)) {
+    console.log('📱 手機版點擊畫面重新開始遊戲');
+    restartGame();
+    return;
+  }
+  
   // 檢查是否點擊了對話選項（包括 Coco 對話和普通對話）
   if (state.inDialog) {
     const dialogElement = document.getElementById('dialog');
@@ -861,13 +868,12 @@ function updateEnding(dt){
     return; // Skip normal ending logic for Game Over
   }
   
-  // Handle Game Over mode (score 0 or time up) - auto-restart for mobile
+  // Handle Game Over mode (score 0 or time up) - click to restart for mobile
   if(ending.gameOverMode && ending.phase === 'gameOver'){
-    // For mobile devices, auto-restart after 3 seconds in menu mode
-    if(isTouchDevice && ending.gameOverTimer >= 5000){ // 2s delay + 3s menu = 5s total
-      console.log('📱 手機版Game Over自動重新開始遊戲');
-      restartGame();
-      return;
+    // For mobile devices, show click hint instead of auto-restart
+    if(isTouchDevice){
+      // Clear restart click area to prevent conflicts
+      ending.restartClickArea = null;
     }
   }
   
@@ -889,11 +895,10 @@ function updateEnding(dt){
       // Start showing menu immediately
       ending.menuAlpha = Math.min(1, ending.menuAlpha + dt/500);
       
-      // For mobile devices, auto-restart after 3 seconds in menu mode
-      if(isTouchDevice && ending.angryAnimationTimer >= 8000){ // 5s animation + 3s menu = 8s total
-        console.log('📱 手機版生氣結局自動重新開始遊戲');
-        restartGame();
-        return;
+      // For mobile devices, show click hint instead of auto-restart
+      if(isTouchDevice){
+        // Clear restart click area to prevent conflicts
+        ending.restartClickArea = null;
       }
       
       // Typewriter effect for menu options (only for non-mobile)
@@ -1828,7 +1833,7 @@ function render(){
           // Draw the text with blinking effect
           ctx.lineWidth = Math.round(4 * mobileScale);
           ctx.strokeStyle = '#000';
-          ctx.strokeText(typewriterText, x, optionY);
+          ctx.fillText(typewriterText, x, optionY);
           
           // Apply blinking effect to the text (white with varying transparency)
           ctx.globalAlpha = blinkAlpha;
@@ -1860,25 +1865,24 @@ function render(){
             h: clickAreaHeight
           };
         } else {
-          // For mobile devices, clear the restart click area and add countdown text
+          // For mobile devices, clear the restart click area and show click hint
           ending.restartClickArea = null;
           
-          // Show countdown text for mobile
-          const countdownFontSize = Math.round(24 * mobileScale);
-          ctx.font = `${countdownFontSize}px "Unifont","UnifontLocal","Zpix","Press Start 2P",monospace`;
+          // Show click hint for mobile
+          const hintFontSize = Math.round(20 * mobileScale);
+          ctx.font = `${hintFontSize}px "Unifont","UnifontLocal","Zpix","Press Start 2P",monospace`;
           ctx.textAlign = 'center';
           ctx.textBaseline = 'middle';
           
-          const countdownY = y + 120;
-          const remainingTime = Math.max(0, 3 - Math.floor(ending.gameOverTimer / 1000));
-          const countdownText = `遊戲將在 ${remainingTime} 秒後自動重新開始`;
+          const hintY = y + 120;
+          const clickHintText = `點擊畫面任意位置重新開始遊戲`;
           
-          // Draw countdown text
+          // Draw click hint text
           ctx.lineWidth = Math.round(2 * mobileScale);
           ctx.strokeStyle = '#000';
-          ctx.strokeText(countdownText, x, countdownY);
+          ctx.strokeText(clickHintText, x, hintY);
           ctx.fillStyle = '#fff';
-          ctx.fillText(countdownText, x, countdownY);
+          ctx.fillText(clickHintText, x, hintY);
         }
       }
       
@@ -2143,27 +2147,26 @@ function render(){
           w: textWidth + (clickAreaPadding * 2),
           h: clickAreaHeight
         };
-      } else {
-        // For mobile devices, clear the restart click area and add countdown text
-        ending.restartClickArea = null;
-        
-        // Show countdown text for mobile
-        const countdownFontSize = Math.round(24 * mobileScale);
-        ctx.font = `${countdownFontSize}px "Unifont","UnifontLocal","Zpix","Press Start 2P",monospace`;
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        
-        const countdownY = y + 120;
-        const remainingTime = Math.max(0, 3 - Math.floor(ending.angryAnimationTimer / 1000));
-        const countdownText = `遊戲將在 ${remainingTime} 秒後自動重新開始`;
-        
-        // Draw countdown text
-        ctx.lineWidth = Math.round(2 * mobileScale);
-        ctx.strokeStyle = '#000';
-        ctx.strokeText(countdownText, x, countdownY);
-        ctx.fillStyle = '#fff';
-        ctx.fillText(countdownText, x, countdownY);
-      }
+              } else {
+          // For mobile devices, clear the restart click area and show click hint
+          ending.restartClickArea = null;
+          
+          // Show click hint for mobile
+          const hintFontSize = Math.round(20 * mobileScale);
+          ctx.font = `${hintFontSize}px "Unifont","UnifontLocal","Zpix","Press Start 2P",monospace`;
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          
+          const hintY = y + 120;
+          const clickHintText = `點擊畫面任意位置重新開始遊戲`;
+          
+          // Draw click hint text
+          ctx.lineWidth = Math.round(2 * mobileScale);
+          ctx.strokeStyle = '#000';
+          ctx.strokeText(clickHintText, x, hintY);
+          ctx.fillStyle = '#fff';
+          ctx.fillText(clickHintText, x, hintY);
+        }
       
       ctx.textAlign = 'left';
       ctx.textBaseline = 'top';
