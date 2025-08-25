@@ -96,6 +96,31 @@ function initTouchSupport() {
     // 添加觸控區域指示器（可選）
     addTouchAreaIndicators();
   }
+  
+  // 觸控檢測完成後，觸發選單重新渲染
+  setTimeout(() => {
+    const menuPre = document.getElementById('start-menu');
+    if (menuPre && menuPre.innerHTML.trim() === '') {
+      // 如果選單是空的，根據設備類型重新渲染
+      const items = isTouchDevice ? ['Start'] : ['How to Play','Start'];
+      let idx = isTouchDevice ? 0 : 1;
+      
+      const renderMenu = () => {
+        const lines = items.map((t, i) => {
+          const selected = (i === idx);
+          if (selected) {
+            return `<span class="option-selected"><span class="symbol-left">></span> ${t} <span class="symbol-right"><</span></span>`;
+          } else {
+            return `  ${t}  `;
+          }
+        });
+        menuPre.innerHTML = lines.join('\n');
+      };
+      
+      renderMenu();
+      console.log('🔄 觸控檢測完成後重新渲染選單:', isTouchDevice ? '手機版' : '桌面版');
+    }
+  }, 100); // 延遲100ms確保觸控檢測完成
 }
 
 // 顯示觸控控制提示
@@ -1841,17 +1866,7 @@ function render(){
           ctx.fillText(typewriterText, x, optionY);
           ctx.globalAlpha = 1.0; // Reset alpha
           
-          // Add underline for "再挑戰一次" option to confirm selection
-          // Note: We're still inside the ctx.save() context, so transformations apply
-          const underlineY = optionY + Math.round(8 * mobileScale);
-          ctx.lineWidth = Math.round(3 * mobileScale);
-          ctx.strokeStyle = '#fff';
-          ctx.globalAlpha = blinkAlpha; // Use same blinking effect as text
-          ctx.beginPath();
-          ctx.moveTo(x - Math.round(textWidth / 2), underlineY);
-          ctx.lineTo(x + Math.round(textWidth / 2), underlineY);
-          ctx.stroke();
-          ctx.globalAlpha = 1.0; // Reset alpha
+          // 移除底線 - 電腦版"再挑戰一次"按鈕不再需要底線
           
           ctx.restore();
           
@@ -2124,17 +2139,7 @@ function render(){
         ctx.fillText(typewriterText, x, optionY);
         ctx.globalAlpha = 1.0; // Reset alpha
         
-        // Add underline for "再挑戰一次" option to confirm selection
-        // Note: We're still inside the ctx.save() context, so transformations apply
-        const underlineY = optionY + Math.round(8 * mobileScale);
-        ctx.lineWidth = Math.round(3 * mobileScale);
-        ctx.strokeStyle = '#fff';
-        ctx.globalAlpha = blinkAlpha; // Use same blinking effect as text
-        ctx.beginPath();
-        ctx.moveTo(x - Math.round(textWidth / 2), underlineY);
-        ctx.lineTo(x + Math.round(textWidth / 2), underlineY);
-        ctx.stroke();
-        ctx.globalAlpha = 1.0; // Reset alpha
+        // 移除底線 - 電腦版"再挑戰一次"按鈕不再需要底線
         
         ctx.restore();
         
