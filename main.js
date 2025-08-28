@@ -2000,16 +2000,16 @@ function render(){
         { text: "─────────────────────────", size: 16, color: '#FFFFFF' },
         { text: "", size: 16, color: '#FFFFFF' }, // Empty line
         { text: "Special Thanks to", size: 24, color: '#FFD700' },
-        { text: "- 你的體貼入微", size: 18, color: '#FFFFFF' },
-        { text: "- 你的可靠穩重", size: 18, color: '#FFFFFF' },
-        { text: "- 你的上進努力", size: 18, color: '#FFFFFF' },
-        { text: "- 你的聰明腦袋", size: 18, color: '#FFFFFF' },
+        { text: "- 你是我生活裡最可靠的任務執行者", size: 18, color: '#FFFFFF' },
+        { text: "- 你記得我說過的那些小事", size: 18, color: '#FFFFFF' },
+        { text: "- 你總是默默做到我沒說出口的期待", size: 18, color: '#FFFFFF' },
+        { text: "- 你是我每次想起都會笑的原因", size: 18, color: '#FFFFFF' },
         { text: "", size: 16, color: '#FFFFFF' }, // Empty line
         { text: "─────────────────────────", size: 16, color: '#FFFFFF' },
         { text: "", size: 16, color: '#FFFFFF' }, // Empty lin
         { text: "生日快樂～～～寶貝 🎂", size: 20, color: '#FFFFFF' },
         { text: "謝謝你出現在我的生活裡", size: 18, color: '#FFFFFF' },
-        { text: "讓我每一天都有個甜蜜的陪伴", size: 18, color: '#FFFFFF' },
+        { text: "讓我每一天都有個可靠的陪伴", size: 18, color: '#FFFFFF' },
         { text: "", size: 16, color: '#FFFFFF' }, // Empty line
         { text: "未來我們會一起去更多地方旅行", size: 18, color: '#FFFFFF' },
         { text: "一起看更多場日出與日落", size: 18, color: '#FFFFFF' },
